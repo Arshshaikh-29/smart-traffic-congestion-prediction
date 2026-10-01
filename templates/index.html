@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlowCast | Traffic Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-mark">F</div><div><strong>FlowCast</strong><small>TRAFFIC INTELLIGENCE</small></div></div>
+  <div class="nav-label">WORKSPACE</div><a class="nav active" href="#dashboard"><span>◫</span> Overview</a><a class="nav" href="#predictor"><span>⌁</span> Congestion predictor</a><a class="nav" href="#insights"><span>▤</span> Insights</a>
+  <div class="sidebar-bottom"><div class="status-dot"></div><div><b>ML engine</b><small>Local model connected</small></div></div>
+</aside>
+<main class="main" id="dashboard">
+  <header class="topbar"><div><div class="eyebrow">SMART MOBILITY / OVERVIEW</div><h1>Traffic command center</h1><p>Forecast road conditions and understand what may slow your journey.</p></div><div class="top-right"><span class="live-pill"><i></i> DEMO ENVIRONMENT</span><div class="avatar">AI</div></div></header>
+  <section class="hero-row">
+    <div class="hero-card"><div class="hero-copy"><span class="eyebrow light">PREDICTIVE TRAFFIC ANALYTICS</span><h2>See congestion<br>before you go.</h2><p>Explore how traffic volume, weather and incidents influence estimated road speed.</p><a href="#predictor" class="hero-link">Run a prediction <b>↗</b></a></div><div class="road-art"><div class="sun"></div><div class="road"><span></span><span></span><span></span><i class="car car1">▰</i><i class="car car2">▰</i></div><div class="hill hill1"></div><div class="hill hill2"></div></div></div>
+    <div class="mini-card"><div class="mini-top"><span class="eyebrow">HOW IT WORKS</span><span class="spark">✦</span></div><div class="mini-number">01 <span>→</span></div><h3>Set road conditions</h3><p>Adjust traffic, time and weather inputs.</p><div class="mini-number">02 <span>→</span></div><h3>Get model estimates</h3><p>View speed, congestion and trip duration.</p></div>
+  </section>
+  <section class="section-head" id="predictor"><div><div class="eyebrow">PREDICTION STUDIO</div><h2>Configure your scenario</h2></div><div class="preset-wrap"><span>Quick scenarios</span><button class="chip" onclick="preset('rush')">Rush hour</button><button class="chip" onclick="preset('rain')">Rainy day</button><button class="chip" onclick="preset('clear')">Light traffic</button></div></section>
+  <section class="workspace">
+    <div class="form-card"><div class="card-title"><div class="icon-box">⌘</div><div><h3>Road & environment</h3><p>Enter conditions for the road segment</p></div></div>
+      <div class="field-grid">
+        <label>Hour of day <span class="field-hint">0–23</span><input id="hour" type="number" min="0" max="23" value="18"></label>
+        <label>Day of week<select id="day"><option value="0">Monday</option><option value="1">Tuesday</option><option value="2">Wednesday</option><option value="3">Thursday</option><option value="4">Friday</option><option value="5">Saturday</option><option value="6">Sunday</option></select></label>
+        <label>Temperature <span class="field-hint">°C</span><input id="temperature" type="number" value="30" step="0.5"></label>
+        <label>Rainfall <span class="field-hint">mm</span><input id="rain" type="number" min="0" value="0" step="0.5"></label>
+        <label>Vehicle count<input id="vehicles" type="number" min="0" value="1200"></label>
+        <label>Road capacity<input id="road_capacity" type="number" min="1" value="1500"></label>
+        <label>Trip distance <span class="field-hint">km</span><input id="distance" type="number" min="0.1" step="0.1" value="10"></label>
+        <label>Incident reported<select id="accident"><option value="0">No incident</option><option value="1">Accident reported</option></select></label>
+      </div>
+      <div class="form-actions"><button class="primary" id="predictBtn" onclick="predictTraffic()">Generate forecast <span>→</span></button><button class="text-button" onclick="resetForm()">Reset inputs</button></div><div id="error" class="error" role="alert"></div>
+      <div class="disclaimer">Prototype note: this starter model uses synthetic demonstration data. Results are illustrative, not live traffic guidance.</div>
+    </div>
+    <div class="output-column">
+      <div class="result-card"><div class="result-heading"><div><div class="eyebrow">MODEL OUTPUT</div><h3>Forecast snapshot</h3></div><span class="result-icon">✳</span></div>
+        <div class="speed-line"><strong id="speed">—</strong><span>km/h<br><small>estimated speed</small></span></div>
+        <div class="meter-label"><span>Congestion intensity</span><b id="scoreLabel">Awaiting prediction</b></div><div class="meter"><div id="meterFill"></div></div>
+        <div class="condition-row"><span id="conditionDot" class="condition-dot"></span><div><b id="congestion">No forecast yet</b><small id="conditionText">Run a scenario to see the estimate.</small></div></div>
+        <div class="divider"></div><div class="trip-time"><div><span class="eyebrow">ESTIMATED TRIP TIME</span><strong id="travel_time">— <small>min</small></strong></div><div class="trip-icon">◷</div></div>
+      </div>
+      <div class="insight-card" id="insights"><div class="insight-icon">✦</div><div><div class="eyebrow">TRAFFIC INSIGHT</div><h3 id="insightTitle">Your insight will appear here</h3><p id="insightText">Generate a forecast to receive a short interpretation of the predicted conditions.</p></div></div>
+    </div>
+  </section>
+  <footer><span>FLOWCAST · FINAL YEAR ML PROJECT</span><span>Forecasts are estimates · Not connected to live sensors</span></footer>
+</main>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+function preset(type){const p={rush:{hour:18,day:0,temperature:31,rain:0,vehicles:1900,road_capacity:1500,distance:12,accident:0},rain:{hour:17,day:4,temperature:25,rain:18,vehicles:1500,road_capacity:1600,distance:8,accident:0},clear:{hour:11,day:5,temperature:29,rain:0,vehicles:350,road_capacity:1600,distance:10,accident:0}}[type];Object.entries(p).forEach(([k,v])=>$(k).value=v);}
+function resetForm(){preset('rush');$('error').textContent='';$('speed').textContent='—';$('congestion').textContent='No forecast yet';$('travel_time').innerHTML='— <small>min</small>';$('meterFill').style.width='0%';$('scoreLabel').textContent='Awaiting prediction';$('conditionText').textContent='Run a scenario to see the estimate.';$('insightTitle').textContent='Your insight will appear here';$('insightText').textContent='Generate a forecast to receive a short interpretation of the predicted conditions.';}
+async function predictTraffic(){const ids=['hour','day','temperature','rain','vehicles','road_capacity','accident','distance'];const data=Object.fromEntries(ids.map(id=>[id,$(id).value]));$('error').textContent='';$('predictBtn').disabled=true;$('predictBtn').textContent='Calculating…';try{const r=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const d=await r.json();if(!r.ok)throw new Error(d.error||'Prediction failed');$('speed').textContent=d.speed;$('congestion').textContent=d.congestion;$('travel_time').innerHTML=`${d.travel_time} <small>min</small>`;const score=Math.max(0,Math.min(100,Math.round((1-d.speed/90)*100)));$('meterFill').style.width=score+'%';$('scoreLabel').textContent=score+'/100';$('conditionText').textContent=d.congestion==='Severe Congestion'?'Very slow movement is estimated.':d.congestion==='High Congestion'?'Expect reduced speeds in this scenario.':d.congestion==='Moderate Congestion'?'Some slowing is estimated.':'Traffic flow is estimated to be relatively smooth.';$('conditionDot').className='condition-dot '+(score>75?'red':score>50?'orange':score>25?'yellow':'green');$('insightTitle').textContent=score>75?'High delay risk in this scenario':score>50?'Allow extra journey time':'Conditions look comparatively free-flowing';$('insightText').textContent=`The model estimates ${d.speed} km/h over ${data.distance} km, giving a simple travel-time estimate of ${d.travel_time} minutes. This is based on entered scenario values, not a live route feed.`;}catch(e){$('error').textContent=e.message;}finally{$('predictBtn').disabled=false;$('predictBtn').innerHTML='Generate forecast <span>→</span>';}}
+</script>
+</body></html>
